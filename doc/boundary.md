@@ -3,7 +3,7 @@
 This doc is meant to specify the data format, with which the boundary of the geometry is exported from PCC (ProgramControlCenter). This serves as a template to the reader implementation.
 
 
-The Data is organized in a .csv structure (`,` next cell to the right, `;` jump into first cell of the next row below).
+The Data is organized in a .csv structure (`,` next cell to the right, `\n` jump into first cell of the next row below).
 
 Each decimal value is stored in utf8 in base 10 format with `.` noting the decimal.
 
@@ -17,9 +17,9 @@ The domain is on the left of a segment.
 
 Every row has the following format: `[x],[y],[curvature],[domain]`
 
-- `[x]` and `[y]` denote the coordinates of the end point of the current segment.
+- `[x]` and `[y]` denote the coordinates of the end point of the current segment in $m$.
 
-- `[curvature]` defines the curvature of the segment (`=0` line, `>0` ccw, `<0` cw)
+- `[curvature]` defines the curvature of the segment (`=0` line, `>0` ccw, `<0` cw) in $m^{-1}$
 
   - arcs cannot have more than 180° (reason: uniqueness)
 
@@ -40,7 +40,7 @@ o |        \
 ```
 =>
 ```
-0,0,0,o;
-2,0,0,i;
-0,2,0.5,n;
+0,0,0,o
+2,0,0,i
+0,2,0.5,n
 ```
