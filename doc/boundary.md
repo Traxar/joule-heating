@@ -25,22 +25,22 @@ Every row has the following format: `[x],[y],[curvature],[domain]`
 
   - if it is impossible to connect 2 points with the given curvature, take the closest curvature were this is possible (reason: floating point errors)
 
-- `[domain]` can take only 3 values (`i` in, `o` out, `n` neutral)
+- `[domain]` can take only 3 values (`0` gnd, `1` air, `2` voltage)
 
 ## Example
 
 ```
  0,2
-  *---___ n
+  *---___ 1
   |       \
-o |        \
+0 |        \
   |         |
   *---------*
- 0,0  i   2,0
+ 0,0  2   2,0
 ```
 =>
 ```
-0,0,0,o
-2,0,0,i
-0,2,0.5,n
+0,0,0,1
+2,0,0,2
+0,2,0.5,1
 ```
