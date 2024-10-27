@@ -1,9 +1,10 @@
-[g,b] = get_geometry('boundaries/hole.csv');
+[g,b] = get_geometry('boundaries/rect.csv');
 pdegplot(g,'FaceLabels','on','EdgeLabels','on');
 pause
 [p,e,t] = initmesh(g,"Hmax",0.001);
 pdemesh(p,e,t);
-[K,~,F] = assema(p,t,1,1,0);
+pause
+[K,~,F] = myassema(p,t,1,1,0);
 e0 = find(b(e(5,:))==0);
 e2 = find(b(e(5,:))==2);
 [R0,G0] = myassemr(p,e(:,e0),1,0);
@@ -16,7 +17,25 @@ b = F+pen*(G0+G2);
 u = A\b;
 
 P = u'*K*u;
+%fprintf('P = %d\n',P);
 R = 1/P;
-fprintf('R = %d',R);
+fprintf('R = %d\n',R);
 pdeplot(p,e,t,'XYData',u,'ZData',u,'ColorMap','jet','Mesh','on');
-grid on; title('uh'); daspect([1 1 100])
+grid on; title('uh'); asp = daspect; asp(1:2) = mean(asp(1:2)); daspect(asp);
+pause
+
+[DX,DY,DA] = myassemd(p,t);
+dx = DX * u;
+dy = DY * u;
+dp = (dx.*dx + dy.*dy);
+%fprintf('int(dp) = %d\n',sum(dp'*DA));
+%pdeplot(p,e,t,'XYData',dx,'ZData',dx,'ZStyle','discontinuous','ColorMap','jet','Mesh','on');
+%grid on; title('dx'); %daspect([1 1 1]);
+%pause
+%pdeplot(p,e,t,'XYData',dy,'ZData',dy,'ZStyle','discontinuous','ColorMap','jet','Mesh','on');
+%grid on; title('dy'); %daspect([1 1 1]);
+%pause
+pdeplot(p,e,t,'XYData',dp,'ZData',dp,'ColorMap','jet','Mesh','on');
+%pdeplot(p,e,t,'XYData',dp,'ZData',dp,'ZStyle','discontinuous','ColorMap','jet','Mesh','on');
+
+grid on; title('dp'); asp = daspect; asp(1:2) = mean(asp(1:2)); daspect(asp);
