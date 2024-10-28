@@ -1,7 +1,10 @@
-[g,b] = get_geometry('boundaries/rect.csv');
+[g,b] = get_geometry('boundaries/big.csv');
 pdegplot(g,'FaceLabels','on','EdgeLabels','on');
 pause
-[p,e,t] = initmesh(g,"Hmax",0.001);
+[p,e,t] = initmesh(g,"Hmax",0.01);
+for i = 1:1
+    [p,e,t] = refinemesh(g,p,e,t);
+end
 pdemesh(p,e,t);
 pause
 [K,~,F] = myassema(p,t,1,1,0);
@@ -23,7 +26,6 @@ fprintf('R = %d\n',R);
 pdeplot(p,e,t,'XYData',u,'ZData',u,'ColorMap','jet','Mesh','on');
 grid on; title('uh'); asp = daspect; asp(1:2) = mean(asp(1:2)); daspect(asp);
 pause
-
 [DX,DY,DA] = myassemd(p,t);
 dx = DX * u;
 dy = DY * u;
@@ -35,7 +37,8 @@ dp = (dx.*dx + dy.*dy);
 %pdeplot(p,e,t,'XYData',dy,'ZData',dy,'ZStyle','discontinuous','ColorMap','jet','Mesh','on');
 %grid on; title('dy'); %daspect([1 1 1]);
 %pause
-pdeplot(p,e,t,'XYData',dp,'ZData',dp,'ColorMap','jet','Mesh','on');
+dp_ =min(dp, 5*P/sum(DA));
+pdeplot(p,e,t,'XYData',dp_,'XYStyle','flat','ZData',dp_,'ZStyle','discontinuous','ColorMap','jet');
 %pdeplot(p,e,t,'XYData',dp,'ZData',dp,'ZStyle','discontinuous','ColorMap','jet','Mesh','on');
 
 grid on; title('dp'); asp = daspect; asp(1:2) = mean(asp(1:2)); daspect(asp);
