@@ -1,35 +1,49 @@
+% constants
+u0 = 20;
+elec_rho20 = 0.60 * 10^-6;
+elec_alpha = 1.39 * 10^-3;
+elec_beta = 0;
+
+elec_n_series = 66;
+elec_n_parallel = 1;
+
+s = 0.003;
+
+%geometry
 [g,b] = get_geometry('boundaries/big.csv');
-pdegplot(g,'FaceLabels','on','EdgeLabels','on');
-pause
+if 1
+    pdegplot(g,'FaceLabels','on','EdgeLabels','on');
+    pause
+end
 [p,e,t] = initmesh(g,"Hmax",0.01);
-for i = 1:1
+for i = 1:0
     [p,e,t] = refinemesh(g,p,e,t);
 end
-pdemesh(p,e,t);
-pause
-[K,~,F] = myassema(p,t,1,1,0);
-e0 = find(b(e(5,:))==0);
-e2 = find(b(e(5,:))==2);
-[R0,G0] = myassemr(p,e(:,e0),1,0);
-[R2,G2] = myassemr(p,e(:,e2),1,1);
-pen = 1E8;
+if 1
+    pdemesh(p,e,t);
+    pause
+end
+np = size(p,2);
 
-A = K+pen*(R0+R2);
-b = F+pen*(G0+G2);
+%initial condition
+u = u0 * ones(np,1);
 
-u = A\b;
+%conversions
+[Dx,Dy,A,PE] = myassemd(p,t);
 
-P = u'*K*u;
-%fprintf('P = %d\n',P);
-R = 1/P;
+ut = (PE * u)';
+cond = 1./elec_res(elec_rho20,20,elec_alpha,elec_beta,ut);
+[r,phi] = elec_calc(p,e,t,b,cond);
+R = r*elec_n_series/(s*elec_n_parallel);
+
 fprintf('R = %d\n',R);
-pdeplot(p,e,t,'XYData',u,'ZData',u,'ColorMap','jet','Mesh','on');
-grid on; title('uh'); asp = daspect; asp(1:2) = mean(asp(1:2)); daspect(asp);
-pause
-[DX,DY,DA] = myassemd(p,t);
-dx = DX * u;
-dy = DY * u;
-dp = (dx.*dx + dy.*dy);
+if 1
+    pdeplot(p,e,t,'XYData',phi,'ZData',phi,'ColorMap','jet','Mesh','on');
+    grid on; title('uh'); asp = daspect; asp(1:2) = mean(asp(1:2)); daspect(asp);
+    pause
+end
+
+loss = elec_loss(cond,Dx,Dy,phi);
 %fprintf('int(dp) = %d\n',sum(dp'*DA));
 %pdeplot(p,e,t,'XYData',dx,'ZData',dx,'ZStyle','discontinuous','ColorMap','jet','Mesh','on');
 %grid on; title('dx'); %daspect([1 1 1]);
@@ -37,8 +51,9 @@ dp = (dx.*dx + dy.*dy);
 %pdeplot(p,e,t,'XYData',dy,'ZData',dy,'ZStyle','discontinuous','ColorMap','jet','Mesh','on');
 %grid on; title('dy'); %daspect([1 1 1]);
 %pause
-dp_ =min(dp, 5*P/sum(DA));
-pdeplot(p,e,t,'XYData',dp_,'XYStyle','flat','ZData',dp_,'ZStyle','discontinuous','ColorMap','jet');
-%pdeplot(p,e,t,'XYData',dp,'ZData',dp,'ZStyle','discontinuous','ColorMap','jet','Mesh','on');
-
-grid on; title('dp'); asp = daspect; asp(1:2) = mean(asp(1:2)); daspect(asp);
+if 1
+    loss_ =min(loss, 2*sum(loss.*A)/sum(A));
+    pdeplot(p,e,t,'XYData',loss_,'XYStyle','flat','ZData',loss_,'ZStyle','discontinuous','ColorMap','jet');
+    %pdeplot(p,e,t,'XYData',dp,'ZData',dp,'ZStyle','discontinuous','ColorMap','jet','Mesh','on');
+    grid on; title('dp'); asp = daspect; asp(1:2) = mean(asp(1:2)); daspect(asp);
+end

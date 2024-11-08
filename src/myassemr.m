@@ -7,7 +7,6 @@ function [R,G]=myassemr(p,e,d,g)
 %         g ... 1 x ne array with coefficients
 % output: R ... np x np sparse boundary matrix 
 %         G ... np x np sparse boundary vector
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 np=size(p,2); ne=size(e,2);
 

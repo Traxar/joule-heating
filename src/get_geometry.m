@@ -7,7 +7,7 @@ function [g, b] = get_geometry(f)
 %                   0 ... electrically isolated
 %                   1 ... grounded
 %                   2 ... high voltage
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 data = readmatrix(f);
 assert(size(data,1) > 0);
 assert(size(data,2) == 4);
@@ -18,7 +18,7 @@ loops = arrayfun(@(s,e)data(s:e,:), starts, ends, 'UniformOutput',0);
 assert(~isempty(loops));
 n = sum(cellfun(@(l)size(l,1), loops));
 g = zeros(10,n);
-b = zeros(n);
+b = zeros(1,n);
 i = 1;
 for loop = loops
     l = loop{1};
