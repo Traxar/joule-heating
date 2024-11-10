@@ -1,59 +1,61 @@
 % constants
-u0 = 20;
-elec_rho20 = 0.60 * 10^-6;
-elec_alpha = 1.39 * 10^-3;
-elec_beta = 0;
+u0 = 100;
 
-elec_n_series = 66;
-elec_n_parallel = 1;
+elec = Elec(rho20 = 0.60*10^-6, alpha = 1.39*10^-3, beta = 0);
+
+plates_series = 66;
+plates_parallel = 1;
+
+heat_cond_20 = 25;
+heat_dens = 7700;
+heat_cap_20 = 460;
+heat_cap_alpha = 0.15;
+heat_cap_beta = 3*10^-4;
 
 s = 0.003;
 
 %geometry
-[g,b] = get_geometry('boundaries/big.csv');
-if 1
-    pdegplot(g,'FaceLabels','on','EdgeLabels','on');
-    pause
-end
-[p,e,t] = initmesh(g,"Hmax",0.01);
+geom = Geom('boundaries/big.csv',0.01);
 for i = 1:0
-    [p,e,t] = refinemesh(g,p,e,t);
+    geom = geom.refine();
 end
 if 1
-    pdemesh(p,e,t);
-    pause
+    geom.plot_mesh();
 end
-np = size(p,2);
+np = size(geom.p,2);
+nt = size(geom.t,2);
+
+%misc
+[Dx,Dy,A,PE] = myassemd(geom.p,geom.t);
+
+%resistance at 20C
+
+[elec_r20,~,~] = elec.calc(geom,Dx,Dy,20*ones(1,nt));
+elec_R20 = elec_r20*plates_series/(s*plates_parallel);
+fprintf('R20 = %d\n',elec_R20);
+
 
 %initial condition
 u = u0 * ones(np,1);
 
-%conversions
-[Dx,Dy,A,PE] = myassemd(p,t);
-
+%elementwise temperature
 ut = (PE * u)';
-cond = 1./elec_res(elec_rho20,20,elec_alpha,elec_beta,ut);
-[r,phi] = elec_calc(p,e,t,b,cond);
-R = r*elec_n_series/(s*elec_n_parallel);
 
-fprintf('R = %d\n',R);
-if 1
-    pdeplot(p,e,t,'XYData',phi,'ZData',phi,'ColorMap','jet','Mesh','on');
-    grid on; title('uh'); asp = daspect; asp(1:2) = mean(asp(1:2)); daspect(asp);
-    pause
+%eval electricity
+[elec_r,elec_pot,elec_loss] = elec.calc(geom,Dx,Dy,ut);
+elec_R = elec_r*plates_series/(s*plates_parallel);
+%measure temperature
+T = elec.T(elec_R,elec_R20);
+
+
+%misc outputs
+fprintf('R = %d\n',elec_R);
+fprintf('T = %d\n',T);
+if 0
+    geom.plot_pw(elec_pot)
 end
 
-loss = elec_loss(cond,Dx,Dy,phi);
-%fprintf('int(dp) = %d\n',sum(dp'*DA));
-%pdeplot(p,e,t,'XYData',dx,'ZData',dx,'ZStyle','discontinuous','ColorMap','jet','Mesh','on');
-%grid on; title('dx'); %daspect([1 1 1]);
-%pause
-%pdeplot(p,e,t,'XYData',dy,'ZData',dy,'ZStyle','discontinuous','ColorMap','jet','Mesh','on');
-%grid on; title('dy'); %daspect([1 1 1]);
-%pause
 if 1
-    loss_ =min(loss, 2*sum(loss.*A)/sum(A));
-    pdeplot(p,e,t,'XYData',loss_,'XYStyle','flat','ZData',loss_,'ZStyle','discontinuous','ColorMap','jet');
-    %pdeplot(p,e,t,'XYData',dp,'ZData',dp,'ZStyle','discontinuous','ColorMap','jet','Mesh','on');
-    grid on; title('dp'); asp = daspect; asp(1:2) = mean(asp(1:2)); daspect(asp);
+    elec_loss_capped =min(elec_loss, 2*sum(elec_loss.*A)/sum(A));
+    geom.plot_ew(elec_loss_capped)
 end
