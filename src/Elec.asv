@@ -25,7 +25,7 @@ classdef Elec
         
         function rho = rho(obj,T)
             Tdiff = T-obj.T_ref;
-            rho = rhoTref*(1+Tdiff.*(obj.rho_alpha+obj.rho_beta*Tdiff));
+            rho = rhoTref*(1+Tdiff*(obj.rho_alpha+obj.rho_beta*Tdiff));
         end
 
         function T = T(obj,rho,rho_ref)
@@ -57,9 +57,12 @@ classdef Elec
             e2 = geom.b(geom.e(5,:))==2; 
             [R0,G0] = myassemr(geom.p,geom.e(:,e0),pen,0);
             [R2,G2] = myassemr(geom.p,geom.e(:,e2),pen,pen*1);%1V test voltage
+            
             A = K+R0+R2;
             b = F+G0+G2;
+            
             phi = A\b;
+   
             
             % losses
             dx = phi'*ptoe.dx;

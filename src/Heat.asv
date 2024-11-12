@@ -66,10 +66,11 @@ classdef Heat
 
             dc = dconv.*t + conv;
             de = demis.*(e./emis).^2;
-            dr = obj.stefan_boltzmann*(de.*d4 + 4*e.*T.^3);
-            dcool = dc + dr;
+            dr 
+
         end
 
+        function dcool
     end
 end
 

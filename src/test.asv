@@ -1,15 +1,13 @@
-% constants:
+% constants
 Celsius = 273.15;
 
-% material:
-% 1.4016
-% https://www.trafitechsrl.com/syrtooph/2024/09/1.4016-A-430.pdf
 elec = Elec(rho20 = 0.60*10^-6, alpha = 1.39*10^-3, beta = 0);
+
 heat_cond_20 = 25;
 heat_dens = 7700;
 heat_cap_20 = 460;
-heat_cap_alpha = 3.2*10^-4;
-heat_cap_beta = 6.6*10^-7;
+heat_cap_alpha = 0.15;
+heat_cap_beta = 3*10^-4;
 
 u0 = 20 + Celsius;
 
